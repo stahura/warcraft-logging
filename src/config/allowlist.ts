@@ -13,7 +13,13 @@ export const SPEC_ALLOWLIST: SpecTarget[] = [
   { className: "DeathKnight", specName: "Unholy" },
   { className: "Warrior", specName: "Arms" },
   { className: "Rogue", specName: "Outlaw" },
+  { className: "Rogue", specName: "Subtlety" },
   { className: "Druid", specName: "Feral" },
+  { className: "Paladin", specName: "Retribution" },
+  { className: "Hunter", specName: "Survival" },
+  { className: "Shaman", specName: "Enhancement" },
+  { className: "Warlock", specName: "Demonology" },
+  { className: "Priest", specName: "Shadow" },
 ];
 
 export function isAllowedSpec(className: string, specName: string): boolean {

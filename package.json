@@ -1,0 +1,39 @@
+{
+  "name": "warcraft-logging",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mythic+ top-run aggregator powered by the Warcraft Logs API",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "prisma generate && tsc",
+    "start": "node dist/server.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy",
+    "ingest": "tsx src/scripts/run-ingest.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stahura/warcraft-logging.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@hono/node-server": "^1.19.0",
+    "@prisma/client": "^6.13.0",
+    "dotenv": "^17.2.1",
+    "hono": "^4.9.0",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "prisma": "^6.13.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

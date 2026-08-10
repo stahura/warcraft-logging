@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Season {
+  id        String    @id @default(cuid())
+  zoneId    Int       @unique
+  name      String
+  partition Int?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  dungeons  Dungeon[]
+  slots     LeaderboardSlot[]
+  aggregates SpecDungeonAggregate[]
+}
+
+model Dungeon {
+  id          String   @id @default(cuid())
+  seasonId    String
+  encounterId Int
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  runs        Run[]
+  slots       LeaderboardSlot[]
+  aggregates  SpecDungeonAggregate[]
+
+  @@unique([seasonId, encounterId])
+  @@index([encounterId])
+}
+
+model Run {
+  id           String   @id @default(cuid())
+  reportCode   String
+  fightId      Int
+  dungeonId    String
+  keyLevel     Int
+  score        Float?
+  durationMs   Int?
+  startTime    DateTime?
+  discoveredAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  dungeon      Dungeon  @relation(fields: [dungeonId], references: [id], onDelete: Cascade)
+  players      RunPlayer[]
+  slots        LeaderboardSlot[]
+
+  @@unique([reportCode, fightId])
+  @@index([dungeonId])
+}
+
+model RunPlayer {
+  id        String   @id @default(cuid())
+  runId     String
+  name      String
+  className String
+  specName  String
+  role      String
+  dps       Float?
+  isTarget  Boolean  @default(false)
+  serverSlug String?
+  region    String?
+  createdAt DateTime @default(now())
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([className, specName])
+}
+
+model LeaderboardSlot {
+  id        String   @id @default(cuid())
+  seasonId  String
+  dungeonId String
+  className String
+  specName  String
+  rank      Int
+  runId     String
+  score     Float?
+  updatedAt DateTime @updatedAt
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  dungeon   Dungeon  @relation(fields: [dungeonId], references: [id], onDelete: Cascade)
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, dungeonId, className, specName, rank])
+  @@index([className, specName])
+}
+
+model SpecDungeonAggregate {
+  id              String   @id @default(cuid())
+  seasonId        String
+  dungeonId       String
+  className       String
+  specName        String
+  sampleSize      Int
+  avgKeyLevel     Float
+  avgDps          Float
+  avgPlace        Float
+  companionsJson  Json
+  computedAt      DateTime @default(now())
+  season          Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  dungeon         Dungeon  @relation(fields: [dungeonId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, dungeonId, className, specName])
+}
+
+model IngestJob {
+  id           String    @id @default(cuid())
+  trigger      String
+  status       String
+  startedAt    DateTime  @default(now())
+  finishedAt   DateTime?
+  limit        Int
+  rankingsSeen Int       @default(0)
+  runsCreated  Int       @default(0)
+  runsSkipped  Int       @default(0)
+  errorCount   Int       @default(0)
+  message      String?
+  detailsJson  Json?
+}

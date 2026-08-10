@@ -19,5 +19,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma ./prisma
+COPY public ./public
 EXPOSE 3000
 CMD ["sh", "-c", "npx prisma db push && node dist/server.js"]

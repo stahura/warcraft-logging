@@ -13,6 +13,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
     "ingest": "tsx src/scripts/run-ingest.ts",
+    "debug:wcl": "tsx src/scripts/debug-wcl-rankings.ts",
     "typecheck": "tsc --noEmit"
   },
   "repository": {

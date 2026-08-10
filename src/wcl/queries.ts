@@ -215,7 +215,21 @@ export async function fetchCharacterRankings(params: {
     data = await wclGraphql<RankingsQuery>(queryBasic, variables);
   }
 
-  const raw = data.worldData?.encounter?.characterRankings;
+  const encounter = data.worldData?.encounter;
+  const raw = encounter?.characterRankings;
+
+  if (process.env.WCL_DEBUG === "1") {
+    const shape = summarizeRankingPayload(raw);
+    console.log("[wcl] characterRankings", {
+      encounterId: params.encounterId,
+      encounterName: encounter?.name ?? null,
+      className: params.className,
+      specName: params.specName,
+      ...shape,
+      sample: shape.sample,
+    });
+  }
+
   return parseRankingPayload(raw, params.className, params.specName);
 }
 
@@ -272,23 +286,71 @@ export async function fetchFightPlayerThroughput(params: {
   return [...merged.values()];
 }
 
+function summarizeRankingPayload(raw: unknown): {
+  typeofRaw: string;
+  rootKeys: string[];
+  rankingsLength: number;
+  droppedMissingIds: number;
+  sample: unknown;
+} {
+  if (raw == null) {
+    return { typeofRaw: "null", rootKeys: [], rankingsLength: 0, droppedMissingIds: 0, sample: null };
+  }
+  if (typeof raw !== "object") {
+    return { typeofRaw: typeof raw, rootKeys: [], rankingsLength: 0, droppedMissingIds: 0, sample: raw };
+  }
+  const root = raw as Record<string, unknown>;
+  const rankings = Array.isArray(root.rankings) ? root.rankings : Array.isArray(raw) ? raw : [];
+  let droppedMissingIds = 0;
+  for (const entry of rankings.slice(0, 50)) {
+    if (!entry || typeof entry !== "object") continue;
+    const r = entry as Record<string, unknown>;
+    const report = asRecord(r.report);
+    const reportCode = String(report?.code ?? r.reportID ?? r.reportCode ?? r.code ?? "");
+    const fightId = Number(
+      report?.fightID ?? report?.fightId ?? r.fightID ?? r.fightId ?? r.fight ?? 0,
+    );
+    if (!reportCode || !fightId) droppedMissingIds += 1;
+  }
+  return {
+    typeofRaw: Array.isArray(raw) ? "array" : "object",
+    rootKeys: Object.keys(root).slice(0, 20),
+    rankingsLength: rankings.length,
+    droppedMissingIds,
+    sample: rankings[0] ?? root,
+  };
+}
+
 function parseRankingPayload(raw: unknown, className: string, specName: string): RankingRow[] {
   if (!raw || typeof raw !== "object") return [];
   const root = raw as Record<string, unknown>;
   const rankings = Array.isArray(root.rankings) ? root.rankings : Array.isArray(raw) ? raw : [];
 
   const rows: RankingRow[] = [];
+  let droppedMissingIds = 0;
   for (const entry of rankings) {
     if (!entry || typeof entry !== "object") continue;
     const r = entry as Record<string, unknown>;
+    const report = asRecord(r.report);
 
-    const reportCode = String(r.reportID ?? r.reportCode ?? r.code ?? "");
-    const fightId = Number(r.fightID ?? r.fightId ?? r.fight ?? 0);
-    if (!reportCode || !fightId) continue;
+    // WCL playerscore payloads nest ids under `report: { code, fightID }`.
+    const reportCode = String(
+      report?.code ?? r.reportID ?? r.reportCode ?? r.code ?? "",
+    );
+    const fightId = Number(
+      report?.fightID ?? report?.fightId ?? r.fightID ?? r.fightId ?? r.fight ?? 0,
+    );
+    if (!reportCode || !fightId) {
+      droppedMissingIds += 1;
+      continue;
+    }
 
     const keyLevel = Number(
       r.bracketData ?? r.keystoneLevel ?? r.hardModeLevel ?? r.size ?? 0,
     );
+
+    // Prefer explicit `score` for playerscore; `amount` can be a signed ranking key.
+    const score = Number(r.score ?? r.amount ?? 0);
 
     const companions = parseCompanionPlayers(r);
 
@@ -296,15 +358,28 @@ function parseRankingPayload(raw: unknown, className: string, specName: string):
       name: String(r.name ?? "Unknown"),
       className: String(r.class ?? r.className ?? className),
       specName: String(r.spec ?? r.specName ?? specName),
-      score: Number(r.amount ?? r.score ?? 0),
+      score: Number.isFinite(score) ? score : 0,
       reportCode,
       fightId,
       keyLevel: Number.isFinite(keyLevel) ? keyLevel : 0,
       durationMs: r.duration != null ? Number(r.duration) : undefined,
       startTime: r.startTime != null ? Number(r.startTime) : undefined,
-      serverSlug: asString(asRecord(r.server)?.slug) ?? asString(r.serverSlug),
+      serverSlug:
+        asString(asRecord(r.server)?.slug) ??
+        asString(asRecord(r.server)?.name) ??
+        asString(r.serverSlug),
       region: asString(asRecord(r.server)?.region) ?? asString(r.serverRegion),
       companions,
+    });
+  }
+
+  if (process.env.WCL_DEBUG === "1" && (rankings.length > 0 || droppedMissingIds > 0)) {
+    console.log("[wcl] parseRankingPayload", {
+      className,
+      specName,
+      rawCount: rankings.length,
+      parsedCount: rows.length,
+      droppedMissingIds,
     });
   }
 
@@ -312,7 +387,13 @@ function parseRankingPayload(raw: unknown, className: string, specName: string):
 }
 
 function parseCompanionPlayers(ranking: Record<string, unknown>): RankingPlayer[] {
-  const candidates = [ranking.team, ranking.players, ranking.otherPlayers, ranking.companions];
+  const candidates = [
+    ranking.team,
+    ranking.players,
+    ranking.otherPlayers,
+    ranking.companions,
+    ranking.allCharacters,
+  ];
   for (const candidate of candidates) {
     if (!Array.isArray(candidate)) continue;
     const players: RankingPlayer[] = [];

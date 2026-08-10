@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warcraft Logging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <div class="brand-block">
+          <p class="eyebrow">Mythic+ aggregator</p>
+          <h1>Warcraft Logging</h1>
+          <p class="sub" id="season-line">Loading…</p>
+        </div>
+        <div class="controls">
+          <label class="field">
+            <span>Spec</span>
+            <select id="spec-select"></select>
+          </label>
+          <label class="field grow">
+            <span>API base</span>
+            <input
+              id="api-base"
+              type="url"
+              placeholder="(same origin)"
+              spellcheck="false"
+            />
+          </label>
+          <button type="button" id="reload-btn" class="btn">Reload</button>
+        </div>
+      </header>
+
+      <section class="status-row" id="status-row" hidden>
+        <p id="status-text"></p>
+      </section>
+
+      <section class="overall" id="overall" hidden>
+        <div class="stat">
+          <span class="stat-label">Avg key</span>
+          <strong id="stat-key">—</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Avg DPS</span>
+          <strong id="stat-dps">—</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Avg place</span>
+          <strong id="stat-place">—</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Dungeons</span>
+          <strong id="stat-count">—</strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>By dungeon</h2>
+          <p class="hint">Top-score runs · companion DPS specs by frequency</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Dungeon</th>
+                <th class="num">Sample</th>
+                <th class="num">Avg key</th>
+                <th class="num">Avg DPS</th>
+                <th class="num">Avg place</th>
+                <th>Top companions</th>
+              </tr>
+            </thead>
+            <tbody id="dungeon-body">
+              <tr>
+                <td colspan="6" class="empty">No data yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Leaderboard runs</h2>
+          <p class="hint">Ranked slots with report links</p>
+        </div>
+        <div id="runs-list" class="runs-list">
+          <p class="empty">No runs loaded.</p>
+        </div>
+      </section>
+
+      <section class="panel jobs-panel">
+        <div class="panel-head">
+          <h2>Recent jobs</h2>
+          <p class="hint">Ingest counters — use these to verify fetches</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Trigger</th>
+                <th>Status</th>
+                <th class="num">Seen</th>
+                <th class="num">Created</th>
+                <th class="num">Skipped</th>
+                <th class="num">Errors</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-body">
+              <tr>
+                <td colspan="8" class="empty">No jobs yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

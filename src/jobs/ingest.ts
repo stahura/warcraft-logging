@@ -132,6 +132,9 @@ async function runIngest(trigger: IngestTrigger, limit: number): Promise<IngestR
 
         const top = rankings.slice(0, limit);
         rankingsSeen += top.length;
+        console.log(
+          `[ingest] ${target.className}/${target.specName} @ ${dungeon.name} (${dungeon.encounterId}): ${rankings.length} rankings, keeping ${top.length}`,
+        );
 
         // Clear and rewrite current leaderboard slots for this dungeon/spec.
         await prisma.leaderboardSlot.deleteMany({

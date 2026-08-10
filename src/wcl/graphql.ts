@@ -47,6 +47,10 @@ export async function wclGraphql<T>(
   };
 
   if (payload.errors?.length) {
+    console.error("[wcl] graphql errors", {
+      variables,
+      errors: payload.errors,
+    });
     throw new WclGraphQlError(payload.errors);
   }
 

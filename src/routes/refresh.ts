@@ -28,18 +28,37 @@ refreshRoutes.post("/v1/refresh", async (c) => {
 
   const limitParam = c.req.query("limit");
   const limit = limitParam ? Number(limitParam) : env.INGEST_LIMIT;
+  const allSpecs = c.req.query("all") === "1";
+  const countParam = c.req.query("specs");
+  const specCount = countParam ? Number(countParam) : env.INGEST_SPECS_PER_TICK;
 
-  // Fire-and-await so Railway HTTP timeout can still receive a result for smaller jobs.
-  // For large backfills, client can poll GET /v1/jobs.
   const wait = c.req.query("wait") !== "0";
+  const options = {
+    allSpecs,
+    specCount: Number.isFinite(specCount) ? specCount : env.INGEST_SPECS_PER_TICK,
+  };
 
   if (!wait) {
-    void startIngest("manual", Number.isFinite(limit) ? limit : env.INGEST_LIMIT).catch((err) => {
-      console.error("[refresh] background ingest failed", err);
-    });
-    return c.json({ accepted: true, status: "started" }, 202);
+    void startIngest("manual", Number.isFinite(limit) ? limit : env.INGEST_LIMIT, options).catch(
+      (err) => {
+        console.error("[refresh] background ingest failed", err);
+      },
+    );
+    return c.json(
+      {
+        accepted: true,
+        status: "started",
+        mode: allSpecs ? "all-specs" : `next-${options.specCount}-specs`,
+        zoneId: env.WCL_ZONE_ID,
+      },
+      202,
+    );
   }
 
-  const result = await startIngest("manual", Number.isFinite(limit) ? limit : env.INGEST_LIMIT);
+  const result = await startIngest(
+    "manual",
+    Number.isFinite(limit) ? limit : env.INGEST_LIMIT,
+    options,
+  );
   return c.json(result, result.status === "failed" ? 500 : 200);
 });

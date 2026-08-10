@@ -11,10 +11,16 @@ export function startScheduler(): void {
     void tick("cron");
   }, intervalMs);
 
-  // Avoid keeping the event loop alive solely for tests if needed.
   timer.unref?.();
 
-  console.log(`[scheduler] ingest every ${env.INGEST_CRON_HOURS} hours`);
+  console.log(
+    `[scheduler] every ${env.INGEST_CRON_HOURS}h · ${env.INGEST_SPECS_PER_TICK} specs/tick · zone ${env.WCL_ZONE_ID}`,
+  );
+
+  // Kick a batch shortly after boot so PTR data starts filling without a manual POST.
+  setTimeout(() => {
+    void tick("cron");
+  }, 15_000).unref?.();
 }
 
 async function tick(trigger: "cron"): Promise<void> {
@@ -29,7 +35,9 @@ async function tick(trigger: "cron"): Promise<void> {
   }
 
   try {
-    const result = await startIngest(trigger);
+    const result = await startIngest(trigger, env.INGEST_LIMIT, {
+      specCount: env.INGEST_SPECS_PER_TICK,
+    });
     console.log(`[scheduler] ingest ${result.status}: ${result.message ?? ""}`);
   } catch (err) {
     console.error("[scheduler] ingest error", err);

@@ -120,13 +120,23 @@ Expect `rankingsSeen > 0`, `runsCreated`/`runsSkipped` moving, aggregate `dungeo
 - Keep `WCL_DEBUG` useful but cheap; avoid logging secrets or full gear dumps in production by default (`WCL_DEBUG=1` only).
 - `.env` stays local; never commit it.
 
+## Season target (PTR)
+
+Production targets **Mythic+ Season 2 (PTR)** via `WCL_ZONE_ID=56`.
+
+- Scheduler runs every `INGEST_CRON_HOURS` (default `1`) and claims `INGEST_SPECS_PER_TICK` (default `6`) DPS specs from the allowlist cursor.
+- Stops a batch early if WCL spend exceeds `WCL_RATE_LIMIT_MAX_RATIO`.
+- Manual `POST /v1/refresh` does the next batch; `?all=1` forces every spec (avoid unless you have budget).
+
+No Railway cron job is required — the Node process timer handles it while the service is up.
+
 ## Local UI
 
 Static viewer in `public/` is served by the API at `/` (`npm run dev` → open the printed localhost URL).
 
-- Defaults API base to the Railway production URL so you can visualize remote data without local Postgres.
+- Defaults API base to `/remote` (proxies Railway) so you can visualize remote data without local Postgres.
 - Clear the API base field to use same-origin (local server + local DB).
-- Shows dungeon aggregates, leaderboard runs, and job counters (`rankingsSeen`, etc.).
+- Shows dungeon aggregates, leaderboard runs, compare tables, and job counters (`rankingsSeen`, etc.).
 
 ## Key files
 

@@ -32,7 +32,7 @@ app.route("/", jobsRoutes);
 app.get("/v1", (c) =>
   c.json({
     name: "warcraft-logging",
-    description: "Mythic+ top-run aggregator for allowlisted specs (v1: Devastation Evoker)",
+    description: "Mythic+ top-run aggregator (PTR Season 2 DPS specs, batched ingest)",
     endpoints: [
       "GET /health",
       "GET /v1/meta/dungeons",

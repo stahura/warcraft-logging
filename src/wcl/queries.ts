@@ -131,6 +131,44 @@ export async function fetchMythicPlusZones(): Promise<WclZone[]> {
   return mythicPlus;
 }
 
+export async function fetchZoneById(zoneId: number): Promise<WclZone | null> {
+  const data = await wclGraphql<{
+    worldData: {
+      zone: {
+        id: number;
+        name: string;
+        frozen: boolean;
+        encounters: Array<{ id: number; name: string } | null> | null;
+      } | null;
+    } | null;
+  }>(
+    `
+    query ZoneById($id: Int!) {
+      worldData {
+        zone(id: $id) {
+          id
+          name
+          frozen
+          encounters { id name }
+        }
+      }
+    }
+  `,
+    { id: zoneId },
+  );
+
+  const zone = data.worldData?.zone;
+  if (!zone) return null;
+  return {
+    id: zone.id,
+    name: zone.name,
+    frozen: zone.frozen,
+    encounters: (zone.encounters ?? [])
+      .filter((e): e is { id: number; name: string } => Boolean(e))
+      .map((e) => ({ id: e.id, name: e.name })),
+  };
+}
+
 export function pickActiveSeasonZone(zones: WclZone[]): WclZone {
   const unfrozen = zones.filter((z) => !z.frozen);
   const pool = unfrozen.length > 0 ? unfrozen : zones;

@@ -123,3 +123,11 @@ model IngestJob {
   message      String?
   detailsJson  Json?
 }
+
+/** Rotates through SPEC_ALLOWLIST across scheduled batches. */
+model IngestCursor {
+  id        String   @id @default("default")
+  zoneId    Int
+  nextIndex Int      @default(0)
+  updatedAt DateTime @updatedAt
+}

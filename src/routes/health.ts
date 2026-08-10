@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { SPEC_ALLOWLIST } from "../config/allowlist.js";
 import { prisma } from "../db/client.js";
 import { isIngestRunning } from "../jobs/ingest.js";
 import { env } from "../config/env.js";
@@ -19,6 +20,6 @@ healthRoutes.get("/health", async (c) => {
     db: dbOk ? "up" : "down",
     ingestRunning: isIngestRunning(),
     wclConfigured: Boolean(env.WCL_CLIENT_ID && env.WCL_CLIENT_SECRET),
-    allowlist: ["Evoker/Devastation"],
+    allowlist: SPEC_ALLOWLIST.map((s) => `${s.className}/${s.specName}`),
   });
 });

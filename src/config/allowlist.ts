@@ -5,11 +5,15 @@ export type SpecTarget = {
 
 /**
  * Specs ingested by the scheduled job.
- * Add more entries here to expand beyond Devastation Evoker.
  * WCL ranking filters use these slug forms (title case matches site filters).
  */
 export const SPEC_ALLOWLIST: SpecTarget[] = [
   { className: "Evoker", specName: "Devastation" },
+  { className: "DemonHunter", specName: "Devourer" },
+  { className: "DeathKnight", specName: "Unholy" },
+  { className: "Warrior", specName: "Arms" },
+  { className: "Rogue", specName: "Outlaw" },
+  { className: "Druid", specName: "Feral" },
 ];
 
 export function isAllowedSpec(className: string, specName: string): boolean {
@@ -26,4 +30,15 @@ export function findAllowedSpec(className: string, specName: string): SpecTarget
       s.className.toLowerCase() === className.toLowerCase() &&
       s.specName.toLowerCase() === specName.toLowerCase(),
   );
+}
+
+export function formatSpecLabel(target: SpecTarget): string {
+  return `${target.specName} ${humanClassName(target.className)}`;
+}
+
+export function humanClassName(className: string): string {
+  return className
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^Death Knight$/i, "Death Knight")
+    .replace(/^Demon Hunter$/i, "Demon Hunter");
 }

@@ -7,6 +7,7 @@ import { startScheduler } from "./jobs/schedule.js";
 import { healthRoutes } from "./routes/health.js";
 import { metaRoutes } from "./routes/meta.js";
 import { aggregateRoutes } from "./routes/aggregate.js";
+import { compareRoutes } from "./routes/compare.js";
 import { refreshRoutes } from "./routes/refresh.js";
 import { jobsRoutes } from "./routes/jobs.js";
 
@@ -24,6 +25,7 @@ app.use(
 app.route("/", healthRoutes);
 app.route("/", metaRoutes);
 app.route("/", aggregateRoutes);
+app.route("/", compareRoutes);
 app.route("/", refreshRoutes);
 app.route("/", jobsRoutes);
 
@@ -36,6 +38,7 @@ app.get("/v1", (c) =>
       "GET /v1/meta/dungeons",
       "GET /v1/meta/classes",
       "GET /v1/aggregate/:className/:specName?includeRuns=1",
+      "GET /v1/compare",
       "GET /v1/jobs",
       "POST /v1/refresh",
     ],

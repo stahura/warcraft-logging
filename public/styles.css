@@ -44,14 +44,142 @@ body {
 .top {
   display: grid;
   gap: 1.5rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.25rem;
 }
 
 @media (min-width: 840px) {
   .top {
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1.4fr 1fr;
     align-items: end;
   }
+}
+
+.selected-hero {
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.selected-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 8px 24px rgba(28, 33, 28, 0.18);
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: #1a1f1a;
+  image-rendering: auto;
+}
+
+.spec-picker-wrap {
+  margin-bottom: 1.35rem;
+}
+
+.picker-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.spec-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 0.65rem;
+}
+
+.spec-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-panel);
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
+}
+
+.spec-option:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  transform: translateY(-1px);
+}
+
+.spec-option[aria-selected="true"] {
+  border-color: var(--ink);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.spec-option img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  border: 2px solid #2a322a;
+  object-fit: cover;
+}
+
+.spec-option .spec-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.15;
+}
+
+.spec-option .class-name {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.spec-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.spec-cell img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid #2a322a;
+  flex: 0 0 auto;
+}
+
+.spec-cell .stack {
+  display: grid;
+  gap: 0.05rem;
+}
+
+.spec-cell .stack strong {
+  font-weight: 600;
+}
+
+.spec-cell .stack span {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+tr.is-selected td {
+  background: color-mix(in srgb, var(--accent-soft) 70%, white);
 }
 
 .eyebrow {
